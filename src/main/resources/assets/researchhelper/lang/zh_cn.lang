@@ -1,0 +1,44 @@
+# Items / tabs
+item.researchhelper.research_compass.name=研究指南针
+itemGroup.researchhelper=研究助手
+
+# GUI labels
+researchhelper.gui.search_label=搜索研究：
+researchhelper.gui.target_label=目标：
+researchhelper.gui.hint_empty_usage=在上方输入研究名称。
+researchhelper.gui.hint_empty_hidden=隐藏的研究同样可被搜索。
+researchhelper.gui.hint_empty_legend=颜色：§a 绿色=已完成 §e 黄色=进行中 §6 金色=可解锁 §c 红色=已锁定
+researchhelper.gui.rebuild=重建
+
+# Dropdown row metadata
+researchhelper.gui.meta_scan=[扫描]
+researchhelper.gui.meta_hidden=隐藏
+
+# Node status suffixes
+researchhelper.gui.status_done=[已完成]
+researchhelper.gui.status_in_progress=[进行中]
+researchhelper.gui.status_ready=[可解锁]
+researchhelper.gui.status_locked=[已锁定]
+
+# Expand/collapse hints
+researchhelper.gui.hint_collapse=[-]
+researchhelper.gui.hint_expand=[+]
+
+# Stage label fragments (use %s)
+researchhelper.gui.stage_prefix=阶段 %s
+researchhelper.gui.stage_warp=扭曲 %s
+researchhelper.gui.stage_none=（无额外要求）
+
+# required_research prefixes (use %s)
+researchhelper.gui.req_need=需要 %s
+researchhelper.gui.req_scan=扫描 %s
+researchhelper.gui.req_trigger=触发 %s
+
+# Extra Thaumcraft scan trigger translations
+research.gotthaumonomicon.text=获取魔导手册
+
+# Knowledge type translations
+tc.research.observation=观察理论
+tc.research.theory=理论
+researchhelper.gui.toggle_unlocked.true=已解锁: 显示
+researchhelper.gui.toggle_unlocked.false=已解锁: 隐藏

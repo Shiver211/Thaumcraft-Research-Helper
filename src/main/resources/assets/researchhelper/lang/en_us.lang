@@ -1,0 +1,37 @@
+# Items / tabs
+item.researchhelper.research_compass.name=Research Compass
+itemGroup.researchhelper=Research Helper
+
+# GUI labels
+researchhelper.gui.search_label=Search research:
+researchhelper.gui.target_label=Target:
+researchhelper.gui.hint_empty_usage=Type a research name (or part of its key) above and press Enter.
+researchhelper.gui.hint_empty_hidden=Hidden researches are also searchable.
+researchhelper.gui.hint_empty_legend=Colors: §a green = done §e yellow = in progress §6 gold = ready §c red = locked
+researchhelper.gui.rebuild=Rebuild
+
+# Dropdown row metadata
+researchhelper.gui.meta_scan=[scan]
+researchhelper.gui.meta_hidden=hidden
+
+# Node status suffixes
+researchhelper.gui.status_done=[done]
+researchhelper.gui.status_in_progress=[in progress]
+researchhelper.gui.status_ready=[ready]
+researchhelper.gui.status_locked=[locked]
+
+# Expand/collapse hints
+researchhelper.gui.hint_collapse=[-]
+researchhelper.gui.hint_expand=[+]
+
+# Stage label fragments (use %s)
+researchhelper.gui.stage_prefix=Stage %s
+researchhelper.gui.stage_warp=warp %s
+researchhelper.gui.stage_none=(no extra requirements)
+
+# required_research prefixes (use %s)
+researchhelper.gui.req_need=need %s
+researchhelper.gui.req_scan=scan %s
+researchhelper.gui.req_trigger=trigger %s
+researchhelper.gui.toggle_unlocked.true=Unlocked: Show
+researchhelper.gui.toggle_unlocked.false=Unlocked: Hide

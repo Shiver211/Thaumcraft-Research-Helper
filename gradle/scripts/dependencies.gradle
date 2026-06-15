@@ -53,6 +53,9 @@ dependencies {
     // shade 'mezz:jei:4.31.2' << will shade HadEnoughItems 4.31.2 directly into your jar
     // For more configuration options: see the bottom of this file and: https://gradleup.com/shadow/configuration/
 
+    // Thaumcraft 6 (1.12.2) via CurseMaven, deobfuscated by RFG
+    implementation rfg.deobf('curse.maven:thaumcraft-223628:2629023')
+
     // Example - CurseMaven dependencies:
     // 'curse.maven:had-enough-items-557549:4543375' << had-enough-items = project slug, 557549 = project id, 4543375 = file id
     // Full documentation: https://cursemaven.com/
