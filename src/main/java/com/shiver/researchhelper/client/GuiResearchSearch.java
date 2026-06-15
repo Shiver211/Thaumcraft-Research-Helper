@@ -160,14 +160,15 @@ public class GuiResearchSearch extends GuiScreen {
 
         if (resultsDirty) {
             results = SearchIndex.search(graph, searchField.getText(), 50);
-            if (!showUnlocked) {
-                EntityPlayer player = Minecraft.getMinecraft().player;
-                results.removeIf(node -> StatusResolver.resolve(player, node) == NodeStatus.COMPLETED);
-            }
             resultsDirty = false;
         }
 
         searchField.drawTextBox();
+        
+        if (searchField.getText().isEmpty()) {
+            String placeholder = I18nHelper.tr(I18nHelper.KEY_HINT_EMPTY_USAGE);
+            fr.drawStringWithShadow(placeholder, searchField.x + 4, searchField.y + (searchField.height - 8) / 2, 0x777777);
+        }
 
         int y = searchField.y + searchField.height + 2;
         if (showingDropdown()) {
@@ -176,11 +177,6 @@ public class GuiResearchSearch extends GuiScreen {
 
         if (tree != null) {
             drawTree(y + (showingDropdown() ? Math.min(results.size(), DROPDOWN_MAX_ROWS) * DROPDOWN_ROW_H + 6 : 4));
-        } else {
-            String hint = I18nHelper.tr(I18nHelper.KEY_HINT_EMPTY_USAGE)
-                    + "\n" + I18nHelper.tr(I18nHelper.KEY_HINT_EMPTY_HIDDEN)
-                    + "\n" + I18nHelper.tr(I18nHelper.KEY_HINT_EMPTY_LEGEND);
-            fr.drawSplitString(hint, PADDING, y + 12, width - PADDING * 2, 0xCCCCCC);
         }
 
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -259,13 +255,16 @@ public class GuiResearchSearch extends GuiScreen {
         fr.drawStringWithShadow(targetCaption, PADDING, headerY, 0xAAAAAA);
         fr.drawStringWithShadow(targetLabel, PADDING + fr.getStringWidth(targetCaption), headerY, targetStatus.getRGB());
 
+        int right = width - PADDING;
+        String legend = I18nHelper.tr(I18nHelper.KEY_HINT_EMPTY_LEGEND);
+        fr.drawStringWithShadow(legend, right - fr.getStringWidth(legend), headerY, 0xCCCCCC);
+
         int top = treeTopY();
         int bottom = height - PADDING - 6;
         int left = PADDING;
-        int right = width - PADDING;
 
         int treeWidth = right - left;
-        visibleRows = TreeRenderer.flatten(tree, treeWidth, fr);
+        visibleRows = TreeRenderer.flatten(tree, treeWidth, fr, showUnlocked);
         treeContentHeight = 0;
         for (TreeRenderer.Row row : visibleRows) {
             treeContentHeight += row.height;

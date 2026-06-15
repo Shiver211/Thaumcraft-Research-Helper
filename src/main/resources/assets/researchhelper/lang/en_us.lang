@@ -5,9 +5,8 @@ itemGroup.researchhelper=Research Helper
 # GUI labels
 researchhelper.gui.search_label=Search research:
 researchhelper.gui.target_label=Target:
-researchhelper.gui.hint_empty_usage=Type a research name (or part of its key) above and press Enter.
-researchhelper.gui.hint_empty_hidden=Hidden researches are also searchable.
-researchhelper.gui.hint_empty_legend=Colors: §a green = done §e yellow = in progress §6 gold = ready §c red = locked
+researchhelper.gui.hint_empty_usage=Type a research name (or part of its key)
+researchhelper.gui.hint_empty_legend=§a done §e in progress §6 ready §c locked
 researchhelper.gui.rebuild=Rebuild
 
 # Dropdown row metadata

@@ -45,9 +45,9 @@ public final class TreeRenderer {
     /**
      * 将树结构展平为可绘制的行列表，计算每行的高度。
      */
-    static List<Row> flatten(PathTree root, int wrapWidth, FontRenderer fr) {
+    static List<Row> flatten(PathTree root, int wrapWidth, FontRenderer fr, boolean showUnlocked) {
         List<Row> rows = new ArrayList<>();
-        flattenRec(root, 0, rows);
+        flattenRec(root, 0, rows, showUnlocked);
         for (Row row : rows) {
             if (row.type == Row.TYPE_STAGE) {
                 int textX = row.depth * INDENT + X_PAD + 6;
@@ -61,7 +61,8 @@ public final class TreeRenderer {
         return rows;
     }
 
-    private static void flattenRec(PathTree tree, int depth, List<Row> out) {
+    private static void flattenRec(PathTree tree, int depth, List<Row> out, boolean showUnlocked) {
+        if (!showUnlocked && tree.cachedStatus == NodeStatus.COMPLETED) return;
         out.add(new Row(tree, depth));
         if (tree.expanded && tree.node != null) {
             List<StageInfo> stages = tree.node.stages;
@@ -70,7 +71,7 @@ public final class TreeRenderer {
             }
         }
         for (PathTree branch : tree.branches) {
-            flattenRec(branch, depth + 1, out);
+            flattenRec(branch, depth + 1, out, showUnlocked);
         }
     }
 

@@ -32,6 +32,7 @@ public final class PathFinder {
         if (depth >= MAX_DEPTH) return tree;
 
         for (String parentKey : node.parentKeys) {
+            if ("gotthaumonomicon".equals(parentKey)) continue; // 强行隐藏“获取魔导手册”这个假前置
             if (ancestors.contains(parentKey)) continue;
             ResearchNode parent = graph.get(parentKey);
             if (parent == null) continue;

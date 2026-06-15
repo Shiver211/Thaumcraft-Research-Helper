@@ -5,9 +5,8 @@ itemGroup.researchhelper=研究助手
 # GUI labels
 researchhelper.gui.search_label=搜索研究：
 researchhelper.gui.target_label=目标：
-researchhelper.gui.hint_empty_usage=在上方输入研究名称。
-researchhelper.gui.hint_empty_hidden=隐藏的研究同样可被搜索。
-researchhelper.gui.hint_empty_legend=颜色：§a 绿色=已完成 §e 黄色=进行中 §6 金色=可解锁 §c 红色=已锁定
+researchhelper.gui.hint_empty_usage=输入研究名称
+researchhelper.gui.hint_empty_legend=§a 已完成 §e 进行中 §6 可解锁 §c 已锁定
 researchhelper.gui.rebuild=重建
 
 # Dropdown row metadata
