@@ -7,6 +7,7 @@ researchhelper.gui.search_label=Search research:
 researchhelper.gui.target_label=Target:
 researchhelper.gui.hint_empty_usage=Type a research name (or part of its key)
 researchhelper.gui.hint_empty_legend=§a done §e in progress §6 ready §c locked
+researchhelper.gui.hint_shortcut=Ctrl+Click research or category to open Thaumonomicon
 researchhelper.gui.rebuild=Rebuild
 
 # Dropdown row metadata

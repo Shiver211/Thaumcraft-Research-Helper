@@ -25,19 +25,23 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraft.item.ItemStack;
+import thaumcraft.api.research.ResearchCategories;
+import thaumcraft.api.research.ResearchEntry;
+
 public class GuiResearchSearch extends GuiScreen {
 
     private GuiTextField searchField;
     private GuiButton refreshButton;
     private GuiButton toggleUnlockedButton;
-    private boolean showUnlocked = true;
+    private static boolean showUnlocked = false;
 
     private Map<String, ResearchNode> graph;
 
     private List<ResearchNode> results = java.util.Collections.emptyList();
     private boolean resultsDirty = true;
 
-    private String selectedKey;
+    private static String selectedKey;
     private PathTree tree;
 
     // Layout
@@ -46,7 +50,8 @@ public class GuiResearchSearch extends GuiScreen {
     private static final int DROPDOWN_MAX_ROWS = 7;
     private static final int DROPDOWN_ROW_H = 12;
 
-    private int scrollOffset;
+    private static int scrollOffset;
+    private static String lastSearchText = "";
     private int treeContentHeight;
     private long lastStatusRefreshTime;
     private List<TreeRenderer.Row> visibleRows;
@@ -63,12 +68,13 @@ public class GuiResearchSearch extends GuiScreen {
         int fieldW = w - PADDING * 2 - 140;
 
         searchField = new GuiTextField(0, fr, PADDING, fieldY, fieldW, SEARCH_H);
+        searchField.setText(lastSearchText);
         searchField.setFocused(true);
         searchField.setMaxStringLength(64);
 
-        refreshButton = new GuiButton(1, w - PADDING - 136, fieldY - 1, 40, SEARCH_H + 2, I18nHelper.tr(I18nHelper.KEY_REBUILD_BUTTON));
+        refreshButton = new GuiButton(1, w - PADDING - 136, fieldY - 3, 40, 20, I18nHelper.tr(I18nHelper.KEY_REBUILD_BUTTON));
         String toggleText = I18nHelper.tr(showUnlocked ? I18nHelper.KEY_TOGGLE_UNLOCKED_TRUE : I18nHelper.KEY_TOGGLE_UNLOCKED_FALSE);
-        toggleUnlockedButton = new GuiButton(2, w - PADDING - 92, fieldY - 1, 92, SEARCH_H + 2, toggleText);
+        toggleUnlockedButton = new GuiButton(2, w - PADDING - 92, fieldY - 3, 92, 20, toggleText);
         
         this.buttonList.clear();
         this.buttonList.add(refreshButton);
@@ -110,6 +116,7 @@ public class GuiResearchSearch extends GuiScreen {
     @Override
     protected void keyTyped(char typedChar, int keyCode) throws IOException {
         if (searchField.textboxKeyTyped(typedChar, keyCode)) {
+            lastSearchText = searchField.getText();
             resultsDirty = true;
             return;
         }
@@ -140,11 +147,44 @@ public class GuiResearchSearch extends GuiScreen {
         if (tree != null && visibleRows != null) {
             TreeRenderer.Row row = rowAt(mouseX, mouseY);
             if (row != null && row.type == TreeRenderer.Row.TYPE_NODE) {
+                if (GuiScreen.isCtrlKeyDown() && hasThaumonomicon(mc.player)) {
+                    int x0 = PADDING + 2;
+                    int textX = x0 + row.depth * TreeRenderer.INDENT + TreeRenderer.X_PAD + 6;
+                    String name = SearchIndex.safeName(row.node);
+                    int nameW = fontRenderer.getStringWidth(name);
+                    int spaceW = fontRenderer.getStringWidth(" ");
+                    
+                    if (mouseX >= textX && mouseX <= textX + nameW) {
+                        ResearchEntry entry = ResearchCategories.getResearch(row.node.key);
+                        if (entry != null) {
+                            mc.displayGuiScreen(new thaumcraft.client.gui.GuiResearchPage(entry, null, 0, 0));
+                        }
+                    } else if (mouseX > textX + nameW && mouseX <= textX + nameW + spaceW + fontRenderer.getStringWidth(row.node.scanTrigger ? ("§7" + I18nHelper.tr(I18nHelper.KEY_META_SCAN)) : ("§8[" + ((row.node.localizedCategoryName != null && !row.node.localizedCategoryName.isEmpty()) ? row.node.localizedCategoryName : row.node.categoryKey) + "]"))) {
+                        try {
+                            java.lang.reflect.Field f = thaumcraft.client.gui.GuiResearchBrowser.class.getDeclaredField("selectedCategory");
+                            f.setAccessible(true);
+                            f.set(null, row.node.categoryKey);
+                            mc.displayGuiScreen(new thaumcraft.client.gui.GuiResearchBrowser());
+                        } catch (Exception e) {}
+                    }
+                    return;
+                }
+                
                 if (!row.node.stages.isEmpty()) {
                     row.tree.expanded = !row.tree.expanded;
                 }
             }
         }
+    }
+
+    private boolean hasThaumonomicon(EntityPlayer player) {
+        for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
+            ItemStack stack = player.inventory.getStackInSlot(i);
+            if (!stack.isEmpty() && "thaumcraft:thaumonomicon".equals(stack.getItem().getRegistryName().toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -153,7 +193,7 @@ public class GuiResearchSearch extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
-        drawDarkPanel(PADDING - 4, PADDING - 4, width - (PADDING - 4) * 2, height - (PADDING - 4) * 2);
+        drawDarkPanel(0, 0, width, height);
 
         FontRenderer fr = fontRenderer;
         fr.drawStringWithShadow("§f" + I18nHelper.tr(I18nHelper.KEY_SEARCH_LABEL), PADDING, PADDING, 0xFFFFFF);
@@ -184,8 +224,6 @@ public class GuiResearchSearch extends GuiScreen {
 
     private void drawDarkPanel(int x, int y, int w, int h) {
         net.minecraft.client.gui.Gui.drawRect(x, y, x + w, y + h, 0xC0101010);
-        net.minecraft.client.gui.Gui.drawRect(x, y, x + w, y + 1, 0xFF555555);
-        net.minecraft.client.gui.Gui.drawRect(x, y, x + 1, y + h, 0xFF555555);
     }
 
     private boolean showingDropdown() {
@@ -253,7 +291,11 @@ public class GuiResearchSearch extends GuiScreen {
         NodeStatus targetStatus = StatusResolver.resolve(player, sel);
         String targetCaption = I18nHelper.tr(I18nHelper.KEY_TARGET_LABEL);
         fr.drawStringWithShadow(targetCaption, PADDING, headerY, 0xAAAAAA);
+        int targetNameW = fr.getStringWidth(targetLabel);
         fr.drawStringWithShadow(targetLabel, PADDING + fr.getStringWidth(targetCaption), headerY, targetStatus.getRGB());
+
+        String hint = "  §8" + I18nHelper.tr(I18nHelper.KEY_HINT_SHORTCUT);
+        fr.drawStringWithShadow(hint, PADDING + fr.getStringWidth(targetCaption) + targetNameW, headerY, 0xFFFFFF);
 
         int right = width - PADDING;
         String legend = I18nHelper.tr(I18nHelper.KEY_HINT_EMPTY_LEGEND);
@@ -337,6 +379,7 @@ public class GuiResearchSearch extends GuiScreen {
         scrollOffset = 0;
         collapseAll(tree);
         searchField.setText("");
+        lastSearchText = "";
         results = java.util.Collections.emptyList();
         resultsDirty = false;
     }
