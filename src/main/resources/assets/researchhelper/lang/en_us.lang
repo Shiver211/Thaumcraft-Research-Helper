@@ -33,5 +33,7 @@ researchhelper.gui.stage_none=(no extra requirements)
 researchhelper.gui.req_need=need %s
 researchhelper.gui.req_scan=scan %s
 researchhelper.gui.req_trigger=trigger %s
+researchhelper.gui.req_obtain=obtain %s
+researchhelper.gui.req_craft=craft %s
 researchhelper.gui.toggle_unlocked.true=Unlocked: Show
 researchhelper.gui.toggle_unlocked.false=Unlocked: Hide

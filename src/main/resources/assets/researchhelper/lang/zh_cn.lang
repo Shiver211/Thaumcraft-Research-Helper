@@ -35,6 +35,8 @@ researchhelper.gui.stage_none=（无额外要求）
 researchhelper.gui.req_need=需要 %s
 researchhelper.gui.req_scan=扫描 %s
 researchhelper.gui.req_trigger=触发 %s
+researchhelper.gui.req_obtain=消耗 %s
+researchhelper.gui.req_craft=合成 %s
 
 # Knowledge type translations
 tc.research.observation=观察理论

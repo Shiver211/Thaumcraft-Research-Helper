@@ -47,4 +47,6 @@ public final class I18nHelper {
     public static final String KEY_REQ_NEED          = "researchhelper.gui.req_need";
     public static final String KEY_REQ_SCAN          = "researchhelper.gui.req_scan";
     public static final String KEY_REQ_TRIGGER       = "researchhelper.gui.req_trigger";
+    public static final String KEY_REQ_OBTAIN        = "researchhelper.gui.req_obtain";
+    public static final String KEY_REQ_CRAFT         = "researchhelper.gui.req_craft";
 }

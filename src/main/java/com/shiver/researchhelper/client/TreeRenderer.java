@@ -145,6 +145,16 @@ public final class TreeRenderer {
             sb.append(formatResearchReq(r));
             first = false;
         }
+        if (!stage.obtainReqs.isEmpty()) {
+            if (!first) sb.append(", ");
+            sb.append(I18nHelper.tr(I18nHelper.KEY_REQ_OBTAIN, joinNames(stage.obtainReqs)));
+            first = false;
+        }
+        if (!stage.craftReqs.isEmpty()) {
+            if (!first) sb.append(", ");
+            sb.append(I18nHelper.tr(I18nHelper.KEY_REQ_CRAFT, joinNames(stage.craftReqs)));
+            first = false;
+        }
         if (stage.warp > 0) {
             if (!first) sb.append(", ");
             sb.append(I18nHelper.tr(I18nHelper.KEY_STAGE_WARP, stage.warp));
@@ -158,6 +168,16 @@ public final class TreeRenderer {
             }
         }
         return sb.toString();
+    }
+
+    /** 将多个物品名称用逗号连接成一个串，供 obtain/craft 文案内嵌。 */
+    private static String joinNames(List<String> names) {
+        StringBuilder out = new StringBuilder();
+        for (int i = 0; i < names.size(); i++) {
+            if (i > 0) out.append(", ");
+            out.append(names.get(i));
+        }
+        return out.toString();
     }
 
     private static String formatKnowledgeReq(KnowledgeReq k) {

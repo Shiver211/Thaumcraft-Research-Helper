@@ -4,6 +4,10 @@ import com.shiver.researchhelper.data.KnowledgeReq;
 import com.shiver.researchhelper.data.ResearchNode;
 import com.shiver.researchhelper.data.StageInfo;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.NonNullList;
+import net.minecraftforge.oredict.OreDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import thaumcraft.api.research.ResearchCategories;
@@ -12,6 +16,7 @@ import thaumcraft.api.research.ResearchEntry;
 import thaumcraft.api.research.ResearchStage;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class GraphBuilder {
@@ -151,7 +156,78 @@ public final class GraphBuilder {
                 info.researchReqs.add(cleaned);
             }
         }
+
+        /*
+         * 物品要求：obtain（需持有/消耗）与 craft（需合成）。
+         */
+        Object[] obtain = s.getObtain();
+        if (obtain != null) {
+            for (Object o : obtain) {
+                String name = describeItemEntry(o);
+                if (name != null) info.obtainReqs.add(name);
+            }
+        }
+        Object[] craft = s.getCraft();
+        if (craft != null) {
+            for (Object o : craft) {
+                String name = describeItemEntry(o);
+                if (name != null) info.craftReqs.add(name);
+            }
+        }
         return info;
+    }
+
+    /**
+     * 把 ResearchStage.obtain / craft 里的单个元素解析为可读名称。
+     * 返回 null 表示该元素无法解析或为空，调用方应跳过。
+     */
+    private static String describeItemEntry(Object o) {
+        if (o == null) return null;
+        if (o instanceof ItemStack) {
+            ItemStack stack = (ItemStack) o;
+            if (stack.isEmpty()) return null;
+            return stack.getDisplayName();
+        }
+        if (o instanceof String) {
+            return oreDictDisplayName((String) o);
+        }
+        if (o instanceof Ingredient) {
+            ItemStack[] stacks = ((Ingredient) o).getMatchingStacks();
+            return firstDisplayName(stacks);
+        }
+        if (o instanceof ItemStack[]) {
+            return firstDisplayName((ItemStack[]) o);
+        }
+        if (o instanceof List) {
+            for (Object e : (List<?>) o) {
+                String name = describeItemEntry(e);
+                if (name != null) return name;
+            }
+            return null;
+        }
+        return o.toString();
+    }
+
+    private static String oreDictDisplayName(String oreKey) {
+        if (oreKey == null || oreKey.isEmpty()) return null;
+        try {
+            NonNullList<ItemStack> ores = OreDictionary.getOres(oreKey, false);
+            String name = firstDisplayName(ores.toArray(new ItemStack[0]));
+            return name != null ? name : oreKey;
+        } catch (Throwable ignored) {
+            return oreKey;
+        }
+    }
+
+    private static String firstDisplayName(ItemStack[] stacks) {
+        if (stacks == null) return null;
+        for (ItemStack s : stacks) {
+            if (s == null || s.isEmpty()) continue;
+            try {
+                return s.getDisplayName();
+            } catch (Throwable ignored) {}
+        }
+        return null;
     }
 
     private static String safeText(ResearchStage s) {
