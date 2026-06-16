@@ -23,7 +23,6 @@ public final class I18nHelper {
     public static final String KEY_SEARCH_LABEL      = "researchhelper.gui.search_label";
     public static final String KEY_TARGET_LABEL      = "researchhelper.gui.target_label";
     public static final String KEY_HINT_EMPTY_USAGE  = "researchhelper.gui.hint_empty_usage";
-    public static final String KEY_HINT_EMPTY_LEGEND = "researchhelper.gui.hint_empty_legend";
     public static final String KEY_HINT_SHORTCUT     = "researchhelper.gui.hint_shortcut";
     public static final String KEY_REBUILD_BUTTON    = "researchhelper.gui.rebuild";
     public static final String KEY_TOGGLE_UNLOCKED_TRUE = "researchhelper.gui.toggle_unlocked.true";

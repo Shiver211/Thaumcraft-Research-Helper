@@ -207,18 +207,18 @@ public class GuiResearchSearch extends GuiScreen {
 
         int y = searchField.y + searchField.height + 2;
         if (showingDropdown()) {
-            drawDropdown(y);
+            drawDropdown(y, mouseX, mouseY);
         }
 
         if (tree != null) {
-            drawTree(y + (showingDropdown() ? Math.min(results.size(), DROPDOWN_MAX_ROWS) * DROPDOWN_ROW_H + 6 : 4));
+            drawTree(y + (showingDropdown() ? Math.min(results.size(), DROPDOWN_MAX_ROWS) * DROPDOWN_ROW_H + 6 : 4), mouseX, mouseY);
         }
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
     private void drawDarkPanel(int w, int h) {
-        net.minecraft.client.gui.Gui.drawRect(0, 0, w, h, 0xC0101010);
+        this.drawGradientRect(0, 0, w, h, 0xC0101010, 0xD0101020);
     }
 
     private boolean showingDropdown() {
@@ -233,17 +233,22 @@ public class GuiResearchSearch extends GuiScreen {
         return idx;
     }
 
-    private void drawDropdown(int topY) {
+    private void drawDropdown(int topY, int mouseX, int mouseY) {
         int rowH = DROPDOWN_ROW_H;
         int n = Math.min(results.size(), DROPDOWN_MAX_ROWS);
         int left = PADDING;
         int right = width - PADDING;
+        net.minecraft.client.gui.Gui.drawRect(left - 1, topY - 1, right + 1, topY + n * rowH + 1, 0xFF444444);
         net.minecraft.client.gui.Gui.drawRect(left, topY, right, topY + n * rowH, 0xE0202020);
         FontRenderer fr = fontRenderer;
         EntityPlayer player = Minecraft.getMinecraft().player;
+        int hoverRow = dropdownRowAt(mouseX, mouseY);
         for (int i = 0; i < n; i++) {
             ResearchNode node = results.get(i);
             int ry = topY + i * rowH;
+            if (i == hoverRow) {
+                net.minecraft.client.gui.Gui.drawRect(left, ry, right, ry + rowH, 0x30FFFFFF);
+            }
             NodeStatus status = StatusResolver.resolve(player, node);
             net.minecraft.client.gui.Gui.drawRect(left, ry, left + 3, ry + rowH - 1, status.getRGB());
             String name = SearchIndex.safeName(node);
@@ -271,7 +276,7 @@ public class GuiResearchSearch extends GuiScreen {
         return y + 12;
     }
 
-    private void drawTree(int headerY) {
+    private void drawTree(int headerY, int mouseX, int mouseY) {
         FontRenderer fr = fontRenderer;
         EntityPlayer player = Minecraft.getMinecraft().player;
 
@@ -286,15 +291,11 @@ public class GuiResearchSearch extends GuiScreen {
         NodeStatus targetStatus = StatusResolver.resolve(player, sel);
         String targetCaption = I18nHelper.tr(I18nHelper.KEY_TARGET_LABEL);
         fr.drawStringWithShadow(targetCaption, PADDING, headerY, 0xAAAAAA);
-        int targetNameW = fr.getStringWidth(targetLabel);
         fr.drawStringWithShadow(targetLabel, PADDING + fr.getStringWidth(targetCaption), headerY, targetStatus.getRGB());
 
-        String hint = "  §8" + I18nHelper.tr(I18nHelper.KEY_HINT_SHORTCUT);
-        fr.drawStringWithShadow(hint, PADDING + fr.getStringWidth(targetCaption) + targetNameW, headerY, 0xFFFFFF);
-
         int right = width - PADDING;
-        String legend = I18nHelper.tr(I18nHelper.KEY_HINT_EMPTY_LEGEND);
-        fr.drawStringWithShadow(legend, right - fr.getStringWidth(legend), headerY, 0xCCCCCC);
+        String hint = "§8" + I18nHelper.tr(I18nHelper.KEY_HINT_SHORTCUT);
+        fr.drawStringWithShadow(hint, right - fr.getStringWidth(hint), headerY, 0xFFFFFF);
 
         int top = treeTopY();
         int bottom = height - PADDING - 6;
@@ -310,20 +311,23 @@ public class GuiResearchSearch extends GuiScreen {
         int maxScroll = Math.max(0, treeContentHeight - treeViewportHeight());
         if (scrollOffset > maxScroll) scrollOffset = maxScroll;
 
+        net.minecraft.client.gui.Gui.drawRect(left - 1, top - 1, right + 1, bottom + 1, 0xAA222222);
         net.minecraft.client.gui.Gui.drawRect(left, top, right, bottom, 0x90000000);
-        net.minecraft.client.gui.Gui.drawRect(left, top, right, top + 1, 0xFF333333);
+        net.minecraft.client.gui.Gui.drawRect(left, top, right, top + 1, 0xFF444444);
 
         GlStateManager.pushMatrix();
         int scaleFactor = scaleFactor();
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor(left * scaleFactor, (mc.displayHeight - bottom * scaleFactor),
-                (right - left) * scaleFactor, (bottom - top) * scaleFactor);
+        GL11.glScissor(left * scaleFactor, (mc.displayHeight - (bottom - 1) * scaleFactor),
+                (right - left) * scaleFactor, (bottom - top - 2) * scaleFactor);
 
+        TreeRenderer.Row hoveredRow = rowAt(mouseX, mouseY);
         int y = top + 2 - scrollOffset;
         for (TreeRenderer.Row row : visibleRows) {
             if (y + row.height >= top && y <= bottom) {
+                boolean isHovered = (row == hoveredRow);
                 TreeRenderer.drawRow(row, fr, left + 2, y, treeWidth,
-                        row.type == TreeRenderer.Row.TYPE_NODE ? row.tree.cachedStatus : null);
+                        row.type == TreeRenderer.Row.TYPE_NODE ? row.tree.cachedStatus : null, isHovered);
             }
             y += row.height;
         }
@@ -335,9 +339,10 @@ public class GuiResearchSearch extends GuiScreen {
             int thumbH = Math.max(12, trackH * (bottom - top) / treeContentHeight);
             float ratio = maxScroll == 0 ? 0f : (float) scrollOffset / maxScroll;
             int thumbY = top + 2 + Math.round((trackH - thumbH) * ratio);
-            int sx = right - 4;
-            net.minecraft.client.gui.Gui.drawRect(sx, top + 2, sx + 2, bottom - 2, 0xFF2A2A2A);
-            net.minecraft.client.gui.Gui.drawRect(sx, thumbY, sx + 2, thumbY + thumbH, 0xFF666666);
+            int sx = right - 6;
+            net.minecraft.client.gui.Gui.drawRect(sx, top + 2, sx + 4, bottom - 2, 0xFF1A1A1A);
+            net.minecraft.client.gui.Gui.drawRect(sx, thumbY, sx + 4, thumbY + thumbH, 0xFF777777);
+            net.minecraft.client.gui.Gui.drawRect(sx + 1, thumbY + 1, sx + 3, thumbY + thumbH - 1, 0xFF555555);
         }
     }
 

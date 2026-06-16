@@ -88,10 +88,13 @@ public final class TreeRenderer {
     /**
      * 绘制单行节点或阶段信息。
      */
-    static void drawRow(Row row, FontRenderer fr, int x0, int y, int wrapWidth, NodeStatus status) {
+    static void drawRow(Row row, FontRenderer fr, int x0, int y, int wrapWidth, NodeStatus status, boolean isHovered) {
+        if (isHovered) {
+            Gui.drawRect(x0 - 2, y, x0 + wrapWidth + 2, y + row.height, 0x15FFFFFF);
+        }
         int x = x0 + row.depth * INDENT + X_PAD;
         if (row.type == Row.TYPE_NODE) {
-            drawStatusIcon(x - 4, y + 2, status);
+            drawStatusIcon(x - 4, y + 3, status);
             String name = SearchIndex.safeName(row.node);
             String catDisplay = (row.node.localizedCategoryName != null && !row.node.localizedCategoryName.isEmpty())
                     ? row.node.localizedCategoryName : row.node.categoryKey;
@@ -103,7 +106,7 @@ public final class TreeRenderer {
             int nameW = fr.getStringWidth(name);
             int spaceW = fr.getStringWidth(" ");
             int metaW = fr.getStringWidth(meta);
-            fr.drawStringWithShadow(fullName, nameX, y, status.getRGB());
+            fr.drawStringWithShadow(fullName, nameX, y + 2, status.getRGB());
             // 记录可点击区间，供命中测试使用（与绘制同源）。
             row.nameHitX0 = nameX;
             row.nameHitX1 = nameX + nameW;
@@ -112,21 +115,21 @@ public final class TreeRenderer {
             String suffix = statusSuffix(status);
             if (!suffix.isEmpty()) {
                 int sx = nameX + fr.getStringWidth(fullName) + 6;
-                fr.drawStringWithShadow(suffix, sx, y, 0xAAAAAA);
+                fr.drawStringWithShadow(suffix, sx, y + 2, 0xAAAAAA);
             }
             String hint = I18nHelper.tr(row.tree.expanded
                     ? I18nHelper.KEY_HINT_COLLAPSE : I18nHelper.KEY_HINT_EXPAND);
             int stages = row.node.stages.size();
             if (stages > 0) {
                 fr.drawStringWithShadow(hint, nameX + fr.getStringWidth(fullName)
-                        + (suffix.isEmpty() ? 0 : fr.getStringWidth("  " + suffix)) + 8, y, 0x888888);
+                        + (suffix.isEmpty() ? 0 : fr.getStringWidth("  " + suffix)) + 8, y + 2, 0x888888);
             }
         } else {
             String text = stageLabel(row.stage, row.stageIndex);
             int textX = x + 6;
             int available = wrapWidth - (row.depth * INDENT + X_PAD + 6) - 12;
             if (available < 60) available = 60;
-            fr.drawSplitString(text, textX, y, available, 0xDDDDDD);
+            fr.drawSplitString(text, textX, y + 1, available, 0xDDDDDD);
         }
     }
 
@@ -136,27 +139,27 @@ public final class TreeRenderer {
         if (stage == null) return sb.toString();
         boolean first = true;
         for (KnowledgeReq k : stage.knowledgeReqs) {
-            if (!first) sb.append(", ");
+            if (!first) sb.append("；");
             sb.append(formatKnowledgeReq(k));
             first = false;
         }
         for (String r : stage.researchReqs) {
-            if (!first) sb.append(", ");
+            if (!first) sb.append("；");
             sb.append(formatResearchReq(r));
             first = false;
         }
         if (!stage.obtainReqs.isEmpty()) {
-            if (!first) sb.append(", ");
+            if (!first) sb.append("；");
             sb.append(I18nHelper.tr(I18nHelper.KEY_REQ_OBTAIN, joinNames(stage.obtainReqs)));
             first = false;
         }
         if (!stage.craftReqs.isEmpty()) {
-            if (!first) sb.append(", ");
+            if (!first) sb.append("；");
             sb.append(I18nHelper.tr(I18nHelper.KEY_REQ_CRAFT, joinNames(stage.craftReqs)));
             first = false;
         }
         if (stage.warp > 0) {
-            if (!first) sb.append(", ");
+            if (!first) sb.append("；");
             sb.append(I18nHelper.tr(I18nHelper.KEY_STAGE_WARP, stage.warp));
         }
         if (first) {
@@ -231,8 +234,8 @@ public final class TreeRenderer {
 
     private static void drawStatusIcon(int x, int y, NodeStatus status) {
         int color = status == null ? 0xFFAAAAAA : status.getRGB();
-        Gui.drawRect(x, y, x + 6, y + 6, 0xFF000000 | color);
-        Gui.drawRect(x + 1, y + 1, x + 5, y + 5, 0xFF000000 | color);
+        Gui.drawRect(x, y, x + 6, y + 6, 0xFF000000); // Outer border
+        Gui.drawRect(x + 1, y + 1, x + 5, y + 5, 0xFF000000 | color); // Inner color
     }
 
     private TreeRenderer() {}
