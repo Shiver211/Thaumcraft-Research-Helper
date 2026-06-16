@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import net.minecraft.item.ItemStack;
 import thaumcraft.api.research.ResearchCategories;
@@ -148,28 +149,22 @@ public class GuiResearchSearch extends GuiScreen {
             TreeRenderer.Row row = rowAt(mouseX, mouseY);
             if (row != null && row.type == TreeRenderer.Row.TYPE_NODE) {
                 if (GuiScreen.isCtrlKeyDown() && hasThaumonomicon(mc.player)) {
-                    int x0 = PADDING + 2;
-                    int textX = x0 + row.depth * TreeRenderer.INDENT + TreeRenderer.X_PAD + 6;
-                    String name = SearchIndex.safeName(row.node);
-                    int nameW = fontRenderer.getStringWidth(name);
-                    int spaceW = fontRenderer.getStringWidth(" ");
-                    
-                    if (mouseX >= textX && mouseX <= textX + nameW) {
+                    if (mouseX >= row.nameHitX0 && mouseX <= row.nameHitX1) {
                         ResearchEntry entry = ResearchCategories.getResearch(row.node.key);
                         if (entry != null) {
                             mc.displayGuiScreen(new thaumcraft.client.gui.GuiResearchPage(entry, null, 0, 0));
                         }
-                    } else if (mouseX > textX + nameW && mouseX <= textX + nameW + spaceW + fontRenderer.getStringWidth(row.node.scanTrigger ? ("§7" + I18nHelper.tr(I18nHelper.KEY_META_SCAN)) : ("§8[" + ((row.node.localizedCategoryName != null && !row.node.localizedCategoryName.isEmpty()) ? row.node.localizedCategoryName : row.node.categoryKey) + "]"))) {
+                    } else if (mouseX >= row.metaHitX0 && mouseX <= row.metaHitX1) {
                         try {
                             java.lang.reflect.Field f = thaumcraft.client.gui.GuiResearchBrowser.class.getDeclaredField("selectedCategory");
                             f.setAccessible(true);
                             f.set(null, row.node.categoryKey);
                             mc.displayGuiScreen(new thaumcraft.client.gui.GuiResearchBrowser());
-                        } catch (Exception e) {}
+                        } catch (Exception ignored) {}
                     }
                     return;
                 }
-                
+
                 if (!row.node.stages.isEmpty()) {
                     row.tree.expanded = !row.tree.expanded;
                 }
@@ -180,7 +175,7 @@ public class GuiResearchSearch extends GuiScreen {
     private boolean hasThaumonomicon(EntityPlayer player) {
         for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
             ItemStack stack = player.inventory.getStackInSlot(i);
-            if (!stack.isEmpty() && "thaumcraft:thaumonomicon".equals(stack.getItem().getRegistryName().toString())) {
+            if (!stack.isEmpty() && "thaumcraft:thaumonomicon".equals(Objects.requireNonNull(stack.getItem().getRegistryName()).toString())) {
                 return true;
             }
         }
@@ -193,7 +188,7 @@ public class GuiResearchSearch extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
-        drawDarkPanel(0, 0, width, height);
+        drawDarkPanel(width, height);
 
         FontRenderer fr = fontRenderer;
         fr.drawStringWithShadow("§f" + I18nHelper.tr(I18nHelper.KEY_SEARCH_LABEL), PADDING, PADDING, 0xFFFFFF);
@@ -207,7 +202,7 @@ public class GuiResearchSearch extends GuiScreen {
         
         if (searchField.getText().isEmpty()) {
             String placeholder = I18nHelper.tr(I18nHelper.KEY_HINT_EMPTY_USAGE);
-            fr.drawStringWithShadow(placeholder, searchField.x + 4, searchField.y + (searchField.height - 8) / 2, 0x777777);
+            fr.drawStringWithShadow(placeholder, searchField.x + 4, searchField.y + (float) (searchField.height - 8) / 2, 0x777777);
         }
 
         int y = searchField.y + searchField.height + 2;
@@ -222,8 +217,8 @@ public class GuiResearchSearch extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
-    private void drawDarkPanel(int x, int y, int w, int h) {
-        net.minecraft.client.gui.Gui.drawRect(x, y, x + w, y + h, 0xC0101010);
+    private void drawDarkPanel(int w, int h) {
+        net.minecraft.client.gui.Gui.drawRect(0, 0, w, h, 0xC0101010);
     }
 
     private boolean showingDropdown() {
@@ -338,7 +333,8 @@ public class GuiResearchSearch extends GuiScreen {
         if (treeContentHeight > (bottom - top)) {
             int trackH = bottom - top - 4;
             int thumbH = Math.max(12, trackH * (bottom - top) / treeContentHeight);
-            int thumbY = top + 2 + (trackH - thumbH) * scrollOffset / Math.max(1, maxScroll);
+            float ratio = maxScroll == 0 ? 0f : (float) scrollOffset / maxScroll;
+            int thumbY = top + 2 + Math.round((trackH - thumbH) * ratio);
             int sx = right - 4;
             net.minecraft.client.gui.Gui.drawRect(sx, top + 2, sx + 2, bottom - 2, 0xFF2A2A2A);
             net.minecraft.client.gui.Gui.drawRect(sx, thumbY, sx + 2, thumbY + thumbH, 0xFF666666);

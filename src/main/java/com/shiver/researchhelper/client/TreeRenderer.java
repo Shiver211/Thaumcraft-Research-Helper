@@ -9,7 +9,7 @@ import com.shiver.researchhelper.data.StageInfo;
 import com.shiver.researchhelper.data.KnowledgeReq;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.client.resources.I18n;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +31,12 @@ public final class TreeRenderer {
         final StageInfo stage;
         final int stageIndex;
         int height = ROW_HEIGHT;
+        /** 节点行中“名称”可点击区间的绝对 x 坐标（含 left 偏移）。仅 TYPE_NODE 有效。 */
+        int nameHitX0 = -1;
+        int nameHitX1 = -1;
+        /** 节点行中“分类/扫描”后缀可点击区间的绝对 x 坐标。仅 TYPE_NODE 有效。 */
+        int metaHitX0 = -1;
+        int metaHitX1 = -1;
 
         Row(PathTree tree, int depth) {
             this.type = TYPE_NODE; this.tree = tree; this.node = tree.node;
@@ -44,10 +50,13 @@ public final class TreeRenderer {
 
     /**
      * 将树结构展平为可绘制的行列表，计算每行的高度。
+     * 根节点（目标研究）始终显示，对“隐藏已完成”的跳过只作用于子节点，
+     * 避免选中已完成目标时整棵树体为空。
      */
     static List<Row> flatten(PathTree root, int wrapWidth, FontRenderer fr, boolean showUnlocked) {
         List<Row> rows = new ArrayList<>();
-        flattenRec(root, 0, rows, showUnlocked);
+        rows.add(new Row(root, 0));
+        flattenChildren(root, 1, rows, showUnlocked);
         for (Row row : rows) {
             if (row.type == Row.TYPE_STAGE) {
                 int textX = row.depth * INDENT + X_PAD + 6;
@@ -61,17 +70,17 @@ public final class TreeRenderer {
         return rows;
     }
 
-    private static void flattenRec(PathTree tree, int depth, List<Row> out, boolean showUnlocked) {
-        if (!showUnlocked && tree.cachedStatus == NodeStatus.COMPLETED) return;
-        out.add(new Row(tree, depth));
+    private static void flattenChildren(PathTree tree, int depth, List<Row> out, boolean showUnlocked) {
         if (tree.expanded && tree.node != null) {
             List<StageInfo> stages = tree.node.stages;
             for (int i = 0; i < stages.size(); i++) {
-                out.add(new Row(tree, stages.get(i), i, depth + 1));
+                out.add(new Row(tree, stages.get(i), i, depth));
             }
         }
         for (PathTree branch : tree.branches) {
-            flattenRec(branch, depth + 1, out, showUnlocked);
+            if (!showUnlocked && branch.cachedStatus == NodeStatus.COMPLETED) continue;
+            out.add(new Row(branch, depth));
+            flattenChildren(branch, depth + 1, out, showUnlocked);
         }
     }
 
@@ -89,18 +98,27 @@ public final class TreeRenderer {
             String meta = row.node.scanTrigger ? ("§7" + I18nHelper.tr(I18nHelper.KEY_META_SCAN)) :
                     ("§8[" + catDisplay + "]");
             String fullName = name + " " + meta;
-            
-            fr.drawStringWithShadow(fullName, x + 6, y, status.getRGB());
+
+            int nameX = x + 6;
+            int nameW = fr.getStringWidth(name);
+            int spaceW = fr.getStringWidth(" ");
+            int metaW = fr.getStringWidth(meta);
+            fr.drawStringWithShadow(fullName, nameX, y, status.getRGB());
+            // 记录可点击区间，供命中测试使用（与绘制同源）。
+            row.nameHitX0 = nameX;
+            row.nameHitX1 = nameX + nameW;
+            row.metaHitX0 = nameX + nameW;
+            row.metaHitX1 = nameX + nameW + spaceW + metaW;
             String suffix = statusSuffix(status);
             if (!suffix.isEmpty()) {
-                int sx = x + 6 + fr.getStringWidth(fullName) + 6;
+                int sx = nameX + fr.getStringWidth(fullName) + 6;
                 fr.drawStringWithShadow(suffix, sx, y, 0xAAAAAA);
             }
             String hint = I18nHelper.tr(row.tree.expanded
                     ? I18nHelper.KEY_HINT_COLLAPSE : I18nHelper.KEY_HINT_EXPAND);
             int stages = row.node.stages.size();
             if (stages > 0) {
-                fr.drawStringWithShadow(hint, x + 6 + fr.getStringWidth(fullName)
+                fr.drawStringWithShadow(hint, nameX + fr.getStringWidth(fullName)
                         + (suffix.isEmpty() ? 0 : fr.getStringWidth("  " + suffix)) + 8, y, 0x888888);
             }
         } else {
@@ -150,7 +168,7 @@ public final class TreeRenderer {
 
         String typeName = k.type;
         try {
-            String localizedType = net.minecraft.client.resources.I18n.format("tc.research." + k.type.toLowerCase());
+            String localizedType = I18n.format("tc.research." + k.type.toLowerCase());
             if (!localizedType.equals("tc.research." + k.type.toLowerCase()) && !localizedType.isEmpty()) {
                 typeName = localizedType;
             }
@@ -172,7 +190,7 @@ public final class TreeRenderer {
     private static String localizeTrigger(String key) {
         if (key == null || key.isEmpty()) return key;
         try {
-            String localized = I18n.translateToLocal("research." + key + ".text");
+            String localized = I18n.format("research." + key + ".text");
             if (!localized.equals("research." + key + ".text") && !localized.isEmpty()) {
                 return localized;
             }

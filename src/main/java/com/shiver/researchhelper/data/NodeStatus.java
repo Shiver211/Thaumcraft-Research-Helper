@@ -1,23 +1,11 @@
 package com.shiver.researchhelper.data;
 
-import net.minecraft.util.text.TextFormatting;
-
 public enum NodeStatus {
-    COMPLETED(TextFormatting.GREEN),
-    IN_PROGRESS(TextFormatting.YELLOW),
-    READY(TextFormatting.GOLD),
-    LOCKED(TextFormatting.RED),
-    UNKNOWN(TextFormatting.GRAY);
-
-    private final TextFormatting color;
-
-    NodeStatus(TextFormatting color) {
-        this.color = color;
-    }
-
-    public TextFormatting getColor() {
-        return color;
-    }
+    COMPLETED,
+    IN_PROGRESS,
+    READY,
+    LOCKED,
+    UNKNOWN;
 
     public int getRGB() {
         switch (this) {

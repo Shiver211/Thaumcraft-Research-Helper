@@ -8,6 +8,8 @@ researchhelper.gui.target_label=目标：
 researchhelper.gui.hint_empty_usage=输入研究名称
 researchhelper.gui.hint_empty_legend=§a 已完成 §e 进行中 §6 可解锁 §c 已锁定
 researchhelper.gui.hint_shortcut=Ctrl左键点击研究名称或分类跳转到魔导手册
+researchhelper.gui.toggle_unlocked.true=已解锁: 显示
+researchhelper.gui.toggle_unlocked.false=已解锁: 隐藏
 researchhelper.gui.rebuild=重建
 
 # Dropdown row metadata
@@ -34,11 +36,7 @@ researchhelper.gui.req_need=需要 %s
 researchhelper.gui.req_scan=扫描 %s
 researchhelper.gui.req_trigger=触发 %s
 
-# Extra Thaumcraft scan trigger translations
-research.gotthaumonomicon.text=获取魔导手册
-
 # Knowledge type translations
 tc.research.observation=观察理论
 tc.research.theory=理论
-researchhelper.gui.toggle_unlocked.true=已解锁: 显示
-researchhelper.gui.toggle_unlocked.false=已解锁: 隐藏
+

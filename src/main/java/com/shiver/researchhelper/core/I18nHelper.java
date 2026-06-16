@@ -1,21 +1,21 @@
 package com.shiver.researchhelper.core;
 
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.client.resources.I18n;
 
 public final class I18nHelper {
 
     private I18nHelper() {}
 
     public static String tr(String key) {
-        return I18n.translateToLocal(key);
+        return I18n.format(key);
     }
 
     public static String tr(String key, String a) {
-        return I18n.translateToLocalFormatted(key, a);
+        return I18n.format(key, a);
     }
 
     public static String tr(String key, int a) {
-        return I18n.translateToLocalFormatted(key, a);
+        return I18n.format(key, a);
     }
 
     // ---- GUI labels ---------------------------------------------------------

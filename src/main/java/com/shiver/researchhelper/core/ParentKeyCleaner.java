@@ -30,7 +30,7 @@ public final class ParentKeyCleaner {
                 String scan = p.substring(1);
                 if (scan.isEmpty()) continue;
                 if (!out.scanTriggerKeys.contains(scan)) out.scanTriggerKeys.add(scan);
-            } else             if (resolvesToResearch(p)) {
+            } else if (resolvesToResearch(p)) {
                 if (!out.researchKeys.contains(p)) out.researchKeys.add(p);
             }
         }

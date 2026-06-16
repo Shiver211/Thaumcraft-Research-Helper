@@ -3,10 +3,9 @@ package com.shiver.researchhelper.core;
 import com.shiver.researchhelper.data.KnowledgeReq;
 import com.shiver.researchhelper.data.ResearchNode;
 import com.shiver.researchhelper.data.StageInfo;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.client.resources.I18n;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import thaumcraft.api.capabilities.IPlayerKnowledge;
 import thaumcraft.api.research.ResearchCategories;
 import thaumcraft.api.research.ResearchCategory;
 import thaumcraft.api.research.ResearchEntry;
@@ -67,13 +66,6 @@ public final class GraphBuilder {
         return GRAPH;
     }
 
-    /**
-     * 使图谱失效，下次访问时强制重新构建。
-     */
-    public static synchronized void invalidate() {
-        GRAPH = null;
-    }
-
     private static ResearchNode snapshot(ResearchEntry entry, java.util.Set<String> scanTriggersSink) {
         boolean hidden = false, autoUnlock = false;
         if (entry.getMeta() != null) {
@@ -128,7 +120,7 @@ public final class GraphBuilder {
         };
         for (String key : candidates) {
             try {
-                String localized = I18n.translateToLocal(key);
+                String localized = I18n.format(key);
                 if (!localized.equals(key) && !localized.isEmpty()) {
                     return localized;
                 }
@@ -170,13 +162,9 @@ public final class GraphBuilder {
         String raw = s.getText();
         if (raw == null || raw.isEmpty()) return "";
         try {
-            return I18n.translateToLocal(raw);
+            return I18n.format(raw);
         } catch (Throwable ignored) {
             return raw;
         }
-    }
-
-    public static String knowledgeTypeLabel(IPlayerKnowledge.EnumKnowledgeType type) {
-        return type == null ? "?" : type.name();
     }
 }
